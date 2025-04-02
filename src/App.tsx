@@ -1,41 +1,23 @@
-import { useEffect, useState } from "react"
-import { Product } from "./components/product"
-import { products } from "./data/product"
-import axios, { AxiosError } from "axios";
-import { IProduct } from "./models";
+import { CreateProduct } from "./components/CreateProduct"
+import { ErrorMessage } from "./components/ErrorMessage"
+import { Loader } from "./components/Loader"
+import { Modal } from "./components/modal"
+import { Product } from "./components/Product"
+import { useProducts } from "./hooks/products"
+
 
 function App() {
-  const [products, setProducets] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  async function fetchProducts() {
-    try{
-      setError('');
-      setLoading(true);
-      const response = await axios.get<IProduct[]>('https://fakestoreapi.com/products');
-      setProducets(response.data);
-      setLoading(false);
-    }
-    catch(e: unknown){
-      const error = e as AxiosError
-      setLoading(false);
-      setError(error.message)
-    }
-    
-  }
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const {loading, error, products} = useProducts()
 
   return (
     <div className="container mx-auto max-w-2xl pt-5">
-      {loading && <p className="text center">Loading ...</p>}
-      {error && <p className="text center text-red-600">{error}</p>}
+      {loading && <Loader />}
+      {error && <ErrorMessage error={error}/>}
       {products.map(product => <Product product={product} key={product.id}/>)}
-      {/* <Product product={products[0]}/>
-      <Product product={products[1]}/> */}
+
+      <Modal title="Create new product">
+        <CreateProduct />  
+      </ Modal>
     </div>
   )
 }
